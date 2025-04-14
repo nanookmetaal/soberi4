@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { ThemeProvider } from "./components/theme-provider";
-import { Navbar } from "./components/ui/navbar";
+import { ThemeProvider } from "./components/providers/theme-provider";
+import { Navbar } from "./components/layout/navbar";
 
 function App() {
   return (
