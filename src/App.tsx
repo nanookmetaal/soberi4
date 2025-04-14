@@ -1,12 +1,17 @@
 import { Button } from "@/components/ui/button";
+import { ThemeProvider } from "./components/theme-provider";
+import { Navbar } from "./components/ui/navbar";
 
 function App() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-svh">
-      <Button className="cursor-pointer" variant={"outline"}>
-        Click me
-      </Button>
-    </div>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <Navbar />
+      <div className="flex flex-col items-center justify-center min-h-svh">
+        <Button className="cursor-pointer" variant={"outline"}>
+          Click me
+        </Button>
+      </div>
+    </ThemeProvider>
   );
 }
 
