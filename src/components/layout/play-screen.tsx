@@ -9,20 +9,18 @@ export function PlayScreen() {
   const [board, setBoard] = useState(emptyBoard);
 
   function addPiece(index: number, colour: "red" | "yellow") {
-    for (let i = 5; i >= 0; i = i - 1) {
-      const newBoard = [...board];
+    setBoard((prevBoard) => {
+      const newBoard = [...prevBoard];
 
-      console.log(newBoard);
+      for (let i = 5; i >= 0; i--) {
+        if (newBoard[index + 7 * i].colour === "none") {
+          newBoard[index + 7 * i] = new GamePiece(colour);
 
-      if (newBoard[index + 7 * i].colour === "none") {
-        newBoard[index + 7 * i] = new GamePiece(colour);
-
-        console.log(`DEBUG: ${index + 7 * i}`);
-
-        setBoard(newBoard);
-        break;
+          break;
+        }
       }
-    }
+      return newBoard;
+    });
   }
 
   function getNotFullColumns(): number[] {
