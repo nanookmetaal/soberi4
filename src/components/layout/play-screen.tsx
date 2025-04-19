@@ -1,20 +1,20 @@
 import { useState } from "react";
-import { GameField } from "./game-field";
+import { BlankPiece, ComputerPiece, GameField, PlayerPiece } from "./game-field";
 import { Button } from "../ui/button";
 import { GamePiece } from "./game-field";
 
-const emptyBoard: Array<GamePiece> = Array(42).fill(new GamePiece("none"));
+const emptyBoard: Array<GamePiece> = Array(42).fill(new BlankPiece());
 
 export function PlayScreen() {
   const [board, setBoard] = useState(emptyBoard);
 
-  function addPiece(index: number, colour: "red" | "yellow") {
+  function addPiece(index: number, piece: GamePiece) {
     setBoard((prevBoard) => {
       const newBoard = [...prevBoard];
 
       for (let i = 5; i >= 0; i--) {
         if (newBoard[index + 7 * i].colour === "none") {
-          newBoard[index + 7 * i] = new GamePiece(colour);
+          newBoard[index + 7 * i] = piece;
 
           break;
         }
@@ -39,13 +39,20 @@ export function PlayScreen() {
     return notFullColumns;
   }
 
-  function checkGameOver() {
+  function checkGameOver(index: number, moveBy: GamePiece) {
     console.log("Checking game over");
+    // starting with the latest placed token - index
+
+    // check left if matching
+
+    // check right if matching
+
+    // check left if matching
+
+    // check right if matching -> then win
   }
 
-  function opponentMove() {
-    console.log("Computer turn");
-
+  function opponentMove(): number {
     // subset of non-empty indexes
     const possibleCols = getNotFullColumns();
 
@@ -53,7 +60,9 @@ export function PlayScreen() {
     const randomIndex = possibleCols[Math.floor(Math.random() * possibleCols.length)];
 
     // make a move
-    addPiece(randomIndex, "yellow");
+    addPiece(randomIndex, new ComputerPiece());
+
+    return randomIndex;
   }
 
   function colNotFull(index: number): boolean {
@@ -63,24 +72,27 @@ export function PlayScreen() {
       }
     }
 
-    console.log("selected column is full");
+    console.error("Selected column is full");
     return false;
   }
 
   const handleCellClick = (index: number) => {
     if (colNotFull(index)) {
+      const playerPiece = new PlayerPiece();
+      const computerPiece = new ComputerPiece();
+
       // player move
-      addPiece(index, "red");
+      addPiece(index, playerPiece);
 
       // check gameover
-      checkGameOver();
+      checkGameOver(index, playerPiece);
 
       setTimeout(() => {
         // computer move
-        opponentMove();
+        const computerMoveIndex = opponentMove();
 
         // check gameover
-        checkGameOver();
+        checkGameOver(computerMoveIndex, computerPiece);
       }, 300);
     }
   };
@@ -88,7 +100,7 @@ export function PlayScreen() {
   return (
     <div className="flex flex-col items-center justify-start min-h-svh">
       <GameField board={board} onCellClick={handleCellClick} />
-      <Button onClick={() => setBoard(Array(42).fill(new GamePiece("none")))}>Restart Game</Button>
+      <Button onClick={() => setBoard(Array(42).fill(new BlankPiece()))}>Restart Game</Button>
     </div>
   );
 }
