@@ -3,7 +3,7 @@ import { BlankPiece, ComputerPiece, GameField, PlayerPiece } from "./game-field"
 import { Button } from "../ui/button";
 import { GamePiece } from "./game-field";
 
-const emptyBoard: Array<GamePiece> = Array(42).fill(new BlankPiece());
+const emptyBoard: GamePiece[][] = Array.from({ length: 7 }, () => Array.from({ length: 6 }, () => new BlankPiece()));
 
 export function PlayScreen() {
   const [board, setBoard] = useState(emptyBoard);
@@ -12,13 +12,13 @@ export function PlayScreen() {
     setBoard((prevBoard) => {
       const newBoard = [...prevBoard];
 
-      for (let i = 5; i >= 0; i--) {
-        if (newBoard[index + 7 * i].colour === "none") {
-          newBoard[index + 7 * i] = piece;
-
+      for (let i = 0; i <= 5; i++) {
+        if (newBoard[index][i].colour === "none") {
+          newBoard[index][i] = piece;
           break;
         }
       }
+
       return newBoard;
     });
   }
@@ -29,7 +29,7 @@ export function PlayScreen() {
 
     for (let col = 0; col < columns; col++) {
       for (let row = 0; row < 6; row++) {
-        if (board[col + row * columns].colour === "none") {
+        if (board[col][row].colour === "none") {
           notFullColumns.push(col);
           break;
         }
@@ -42,6 +42,8 @@ export function PlayScreen() {
   function checkGameOver(index: number, moveBy: GamePiece) {
     console.log("Checking game over");
     // starting with the latest placed token - index
+
+    console.log(`Current move: ${index}`);
 
     // check left if matching
 
@@ -66,8 +68,8 @@ export function PlayScreen() {
   }
 
   function colNotFull(index: number): boolean {
-    for (let curr = index + 1; curr < (index + 1) * 6; curr = curr + 7) {
-      if (board[curr - 1].colour === "none") {
+    for (let curr = 0; curr < 6; curr++) {
+      if (board[index][curr].colour === "none") {
         return true;
       }
     }
@@ -87,13 +89,12 @@ export function PlayScreen() {
       // check gameover
       checkGameOver(index, playerPiece);
 
-      setTimeout(() => {
-        // computer move
-        const computerMoveIndex = opponentMove();
-
-        // check gameover
-        checkGameOver(computerMoveIndex, computerPiece);
-      }, 300);
+      // setTimeout(() => {
+      //   // computer move
+      //   const computerMoveIndex = opponentMove();
+      //   // check gameover
+      //   checkGameOver(computerMoveIndex, computerPiece);
+      // }, 300);
     }
   };
 
