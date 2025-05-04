@@ -7,13 +7,17 @@ const emptyBoard: GamePiece[][] = Array.from({ length: 7 }, () => Array.from({ l
 
 export function PlayScreen() {
   const [board, setBoard] = useState(emptyBoard);
+  const [gameOver, setGameOver] = useState(false);
 
-  function addPiece(index: number, piece: GamePiece) {
+  function addPiece(index: number, piece: GamePiece): number {
+    let placedRow = 0;
+
     setBoard((prevBoard) => {
-      const newBoard = [...prevBoard];
+      const newBoard = prevBoard.map((col) => [...col]);
 
       for (let i = 0; i <= 5; i++) {
         if (newBoard[index][i].colour === "none") {
+          placedRow = i;
           newBoard[index][i] = piece;
           break;
         }
@@ -21,6 +25,8 @@ export function PlayScreen() {
 
       return newBoard;
     });
+
+    return placedRow;
   }
 
   function getNotFullColumns(): number[] {
@@ -39,19 +45,60 @@ export function PlayScreen() {
     return notFullColumns;
   }
 
-  function checkGameOver(index: number, moveBy: GamePiece) {
+  function checkGameOver(index: number, placedRow: number, moveBy: GamePiece): boolean {
     console.log("Checking game over");
-    // starting with the latest placed token - index
 
-    console.log(`Current move: ${index}`);
+    const columns = 7;
+    const rows = 6;
+    const target = 4; // Number of consecutive pieces needed to win
+    const color = moveBy.colour;
 
-    // check left if matching
+    // Define directions as a map
+    const directions = [
+      { name: "horizontal", colStep: 1, rowStep: 0 }, // Horizontal (left-right)
+      { name: "vertical", colStep: 0, rowStep: 1 }, // Vertical (up-down)
+      { name: "diag1", colStep: 1, rowStep: 1 }, // Diagonal (bottom-left to top-right)
+      { name: "diag2", colStep: 1, rowStep: -1 }, // Diagonal (top-left to bottom-right)
+    ];
 
-    // check right if matching
+    // Helper function to count consecutive pieces in a direction
+    function countInDirection(col: number, row: number, colStep: number, rowStep: number): number {
+      let count = 0;
+      let currentCol = col + colStep;
+      let currentRow = row + rowStep;
 
-    // check left if matching
+      while (
+        currentCol >= 0 &&
+        currentCol < columns &&
+        currentRow >= 0 &&
+        currentRow < rows &&
+        board[currentCol][currentRow].colour === color
+      ) {
+        count++;
+        currentCol += colStep;
+        currentRow += rowStep;
+      }
 
-    // check right if matching -> then win
+      return count;
+    }
+
+    // Iterate over all directions
+    for (const { name, colStep, rowStep } of directions) {
+      const count =
+        1 + // Include the current piece
+        countInDirection(index, placedRow, colStep, rowStep) + // Forward direction
+        countInDirection(index, placedRow, -colStep, -rowStep); // Backward direction
+
+      console.log(`Checking ${name}: ${count} consecutive pieces`);
+
+      if (count >= target) {
+        console.log(`Game over! ${color} wins.`);
+        return true; // Game over
+      }
+    }
+
+    console.log("No winner yet.");
+    return false; // No winner
   }
 
   function opponentMove(): number {
@@ -84,23 +131,27 @@ export function PlayScreen() {
       const computerPiece = new ComputerPiece();
 
       // player move
-      addPiece(index, playerPiece);
+      const placedRow = addPiece(index, playerPiece);
 
       // check gameover
-      checkGameOver(index, playerPiece);
+      const isPlayerWon = checkGameOver(index, placedRow, playerPiece);
+      setGameOver(isPlayerWon);
 
-      // setTimeout(() => {
-      //   // computer move
-      //   const computerMoveIndex = opponentMove();
-      //   // check gameover
-      //   checkGameOver(computerMoveIndex, computerPiece);
-      // }, 300);
+      if (!isPlayerWon) {
+        setTimeout(() => {
+          // computer move
+          const computerMoveIndex = opponentMove();
+          // check gameover
+          const isOpponentWin = checkGameOver(computerMoveIndex, computerMoveIndex, computerPiece);
+          setGameOver(isOpponentWin);
+        }, 300);
+      }
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-start min-h-svh">
-      <GameField board={board} onCellClick={handleCellClick} />
+      <GameField board={board} onCellClick={handleCellClick} gameOver={gameOver} />
       <Button onClick={() => setBoard(Array(42).fill(new BlankPiece()))}>Restart Game</Button>
     </div>
   );
